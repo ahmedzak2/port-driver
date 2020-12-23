@@ -6,7 +6,7 @@
  *
  * Description: Header file for TM4C123GH6PM Microcontroller - Port Driver.
  *
- * Author: Mohamed Tarek
+ * Author: ahmed zakria
  ******************************************************************************/
 
 #ifndef PORT_H
@@ -172,7 +172,7 @@ typedef struct
 /* Function for Initializes the Port Driver module */
 void Port_Init(const Port_ConfigType *ConfigPtr );
 /*  Function to Sets the port pin direction. */
-void Port_SetPinDirection (Port_PinType Pin, Port_PinDirectionType Direction);    
+ extern void Port_SetPinDirection (Port_PinType Pin, Port_PinDirectionType Direction);    
 /*  Function to shall refresh the direction of all configured 
 ports to the configured direction. */
 void Port_RefreshPortDirection(void);
@@ -184,8 +184,8 @@ void Port_GetVersionInfo(Std_VersionInfoType* versioninfo);
 void Port_SetPinMode(Port_PinType Pin, Port_PinModeType Mode);
 
 /* Extern PB structures to be used by Dio and other modules */
-extern const Port_ConfigType Port_Config;
 
+extern const Port_ConfigType Port_Config;
 
 #endif /* PORT_H */
 

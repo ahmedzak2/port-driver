@@ -6,12 +6,21 @@
  *
  * Description: Source file for TM4C123GH6PM Microcontroller - Port Driver.
  *
- * Author: Mohamed Tarek
+ * Author: ahmed zakria
  ******************************************************************************/
-
 #include "Port.h"
 #include "Port_Regs.h"
 #include "tm4c123gh6pm_registers.h"
+#if (PORT_DEV_ERROR_DETECT == STD_ON)
+#include "Det.h"
+/* AUTOSAR Version checking between Det and port Modules */
+#if ((DET_AR_MAJOR_VERSION != PORT_AR_RELEASE_MAJOR_VERSION)\
+ || (DET_AR_MINOR_VERSION != PORT_AR_RELEASE_MINOR_VERSION)\
+ || (DET_AR_PATCH_VERSION != PORT_AR_RELEASE_PATCH_VERSION))
+  #error "The AR version of Det.h does not match the expected version"
+#endif
+#endif
+
  volatile Port_Status PORTSTATUS;
 /*******************************************************************************
  *                      Function Prototypes                                    *
@@ -57,7 +66,7 @@ void Port_Init(const Port_ConfigType *ConfigPtr )
 }
 if ((pin_num  % compare == MIN_PIN_NUM) &&(pin_num!=MIN_PIN_NUM))
 {
- port_num =port_num +one;
+ port_num = port_num +one;
     }
       
     
@@ -174,6 +183,11 @@ if ((Pin  % compare == MIN_PIN_NUM) &&(Pin!=zero))
   if(PORTSTATUS !=PORT_INITIALIZED)
 {
    Det_ReportError(PORT_MODULE_ID, PORT_INSTANCE_ID, Port_SET_PIN_DIRECTION_SID,
+		port_E_UNINIT);
+}
+ if(local_port >PORT_F)
+{
+   Det_ReportError(PORT_MODULE_ID, PORT_INSTANCE_ID, Port_SET_PIN_DIRECTION_SID,
 		port_E_DIRECTION_UNCHANGEABLE);
 }
 else
@@ -234,7 +248,21 @@ else if(direction == INPUT)
 
 void Port_RefreshPortDirection(void)
 {
+    
+#if (PORT_DEV_ERROR_DETECT == STD_ON)
   
+  /* check if the Port driver initialized or Not */
+  if(PORTSTATUS != PORT_INITIALIZED)
+  {
+    /* Report to DET  */
+    Det_ReportError(PORT_MODULE_ID, PORT_INSTANCE_ID, Port_SET_PIN_DIRECTION_SID,
+		port_E_UNINIT);
+  }
+  else
+  {
+  }
+ 
+#endif 
 }
 /************************************************************************************
 * Service Name: Port_GetVersionInfo
@@ -261,7 +289,7 @@ void Port_GetVersionInfo(Std_VersionInfoType* versioninfo)
     #endif 
   
  
-		/* Copy the vendor Id */
+                  /* Copy the vendor Id */
 		versioninfo->vendorID = (uint16)PORT_VENDOR_ID;
 		/* Copy the module Id */
 		versioninfo->moduleID = (uint16)PORT_MODULE_ID;
@@ -288,7 +316,7 @@ void Port_SetPinMode(Port_PinType Pin, Port_PinModeType Mode)
 volatile uint32 * PortGpio_Ptr = NULL_PTR; /* point to the required Port Registers base address */ 
 Port_PortType  local_port=zero ;
 Port_PinType local_pin;
-  Port_PinDirectionType direction ; 
+   
     #if(PORT_DEV_ERROR_DETECT ==STD_ON)
 if(Pin>PORT_CONFIGURED_PINS)
   {
@@ -347,9 +375,9 @@ else if (Mode == PORT_PIN_MODE_DIO)
 else
 {
   CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ANALOG_MODE_SEL_REG_OFFSET) , local_pin);      /* SETT the corresponding bit in the GPIOAMSEL register to disable analog functionality on this pin */
-  SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ANALOG_MODE_SEL_REG_OFFSET) , local_pin);      /* Clear the corresponding bit in the GPIOAMSEL register to disable analog functionality on this pin */
-  SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , local_pin); /* enbale Alternative function for this pin by clear the corresponding bit in GPIOAFSEL register */
+    SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , local_pin); /* enbale Alternative function for this pin by clear the corresponding bit in GPIOAFSEL register */
       *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_CTL_REG_OFFSET) |= (0x0000000F << (local_pin * 4)); /* Clear the PMCx bits for this pin */
+      *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_CTL_REG_OFFSET) |= (Mode << (local_pin * 4));
 }
 
 

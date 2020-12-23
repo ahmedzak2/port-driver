@@ -12,8 +12,6 @@
 #include "Dio.h"
 #include "Led.h"
 
-/* LED Configurations Structure */
-static Port_ConfigType  g_LED_Config;
 
 
 /*********************************************************************************************/
@@ -22,26 +20,18 @@ static Port_ConfigType  g_LED_Config;
  *                      Function Prototypes                                    *
  *******************************************************************************/
 
-/************************************************************************************
-/* Description: Called by the LED_Init function (only) used to fill the led configurations structure 
-static void LED_configurations(void)
-{
-    g_LED_Config.port_num  = LED_PORT;         Set LED Port value 
-    g_LED_Config.pin_num   = LED_PIN_NUM;     Set LED PIN Number value 
-   g_LED_Config.initial_value  = LED_OFF;       Turn Off the LED 
-}
-*/
-
 /*********************************************************************************************/
-/* void LED_init(void)
+void LED_init(void)
 {
-    LED_configurations(); 
+
+Port_SetPinDirection (LED_PIN_NUM,ouput);
+ Dio_WriteChannel(DioConf_LED1_CHANNEL_ID_INDEX,LED_OFF); /* LED OFF */
 }
-*/
+
 /*********************************************************************************************/
 void LED_setOn(void)
 {
-    Dio_WriteChannel(DioConf_LED1_CHANNEL_ID_INDEX,LED_ON);  /* LED ON */
+    Dio_WriteChannel(DioConf_LED1_CHANNEL_ID_INDEX,LED_ON); /* LED on */
 }
 
 /*********************************************************************************************/
