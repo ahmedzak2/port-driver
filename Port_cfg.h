@@ -36,8 +36,6 @@
              
    // ports defination
 #define PORT_CONFIGURED_PINS	             (42U)
-#define PORT_INITIALIZED                     (1U)
-#define PORT_NOT_INITIALIZED                 (0U)
 #define MIN_PIN_NUM                 (0)
 #define MAX_PIN_NUM                 (42)
 #define zero                         (0)

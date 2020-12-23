@@ -12,7 +12,7 @@
 #include "Port.h"
 #include "Port_Regs.h"
 #include "tm4c123gh6pm_registers.h"
-
+ volatile Port_Status PORTSTATUS;
 /*******************************************************************************
  *                      Function Prototypes                                    *
  *******************************************************************************/
@@ -32,7 +32,7 @@ void Port_Init(const Port_ConfigType *ConfigPtr )
  Port_PinType loopCounter ;
  port_num port_num; 
   uint8 pin_num; 
-  Port_Status = PORT_INITIALIZED ;
+   PORTSTATUS = PORT_INITIALIZED ;
 
     volatile uint32 * PortGpio_Ptr = NULL_PTR; /* point to the required Port Registers base address */
     volatile uint32 delay = 0;
@@ -171,7 +171,7 @@ if ((Pin  % compare == MIN_PIN_NUM) &&(Pin!=zero))
   local_port= local_port+one;
     }
 #if(PORT_DEV_ERROR_DETECT ==STD_ON)
-  if(Port_Status == PORT_NOT_INITIALIZED)
+  if(PORTSTATUS !=PORT_INITIALIZED)
 {
    Det_ReportError(PORT_MODULE_ID, PORT_INSTANCE_ID, Port_SET_PIN_DIRECTION_SID,
 		port_E_DIRECTION_UNCHANGEABLE);
@@ -204,7 +204,7 @@ else
         case  PORT_F: PortGpio_Ptr = (volatile uint32 *)GPIO_PORTF_BASE_ADDRESS; /* PORTF Base Address */
 		 break;
     }
-    if(direction == PORT_PIN_OUT)
+    if(direction == PORT_change)
     {
        /* Set the corresponding bit in the GPIODIR register to configure it as output pin */
     
@@ -288,7 +288,7 @@ void Port_SetPinMode(Port_PinType Pin, Port_PinModeType Mode)
 volatile uint32 * PortGpio_Ptr = NULL_PTR; /* point to the required Port Registers base address */ 
 Port_PortType  local_port=zero ;
 Port_PinType local_pin;
-  Port_PinDirectionType direction =Direction; 
+  Port_PinDirectionType direction ; 
     #if(PORT_DEV_ERROR_DETECT ==STD_ON)
 if(Pin>PORT_CONFIGURED_PINS)
   {
@@ -333,9 +333,24 @@ switch(local_port)
         case  PORT_F: PortGpio_Ptr = (volatile uint32 *)GPIO_PORTF_BASE_ADDRESS; /* PORTF Base Address */
 		 break;
     }
-if (mode == PORT_PIN_MODE_ADC)
+if (Mode == PORT_PIN_MODE_ADC)
 {
-  SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , local_pin); /* enbale Alternative function for this pin by clear the corresponding bit in GPIOAFSEL register */
-      *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_CTL_REG_OFFSET) &= ~(0x0000000F << (pin_num * 4)); /* Clear the PMCx bits for this pin */
+  SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ANALOG_MODE_SEL_REG_OFFSET) , local_pin);      /* Clear the corresponding bit in the GPIOAMSEL register to disable analog functionality on this pin */
+  CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , local_pin); /* CLEAR Alternative function for this pin by clear the corresponding bit in GPIOAFSEL register */
 }
+else if (Mode == PORT_PIN_MODE_DIO)
+{
+  CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ANALOG_MODE_SEL_REG_OFFSET) , local_pin);      /* Clear the corresponding bit in the GPIOAMSEL register to disable analog functionality on this pin */
+    CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , local_pin);             /* Disable Alternative function for this pin by clear the corresponding bit in GPIOAFSEL register */
+    *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_CTL_REG_OFFSET) &= ~(0x0000000F << (local_pin * 4));     /* Clear the PMCx bits for this pin */
+}
+else
+{
+  CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ANALOG_MODE_SEL_REG_OFFSET) , local_pin);      /* SETT the corresponding bit in the GPIOAMSEL register to disable analog functionality on this pin */
+  SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ANALOG_MODE_SEL_REG_OFFSET) , local_pin);      /* Clear the corresponding bit in the GPIOAMSEL register to disable analog functionality on this pin */
+  SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , local_pin); /* enbale Alternative function for this pin by clear the corresponding bit in GPIOAFSEL register */
+      *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_CTL_REG_OFFSET) |= (0x0000000F << (local_pin * 4)); /* Clear the PMCx bits for this pin */
+}
+
+
 }

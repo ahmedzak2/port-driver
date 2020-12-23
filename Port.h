@@ -89,7 +89,7 @@ called without module initialization*/
 /*******************************************************************************
  *                              Module Data Types                              *
  *******************************************************************************/
-typedef uint8 Port_Status; /* Type definition is Data type for the symbolic name of a port statue. */
+typedef uint8  Port_Status; /* Type definition is Data type for the symbolic name of a port statue. */
 typedef uint8 Port_PinType;;/* Type definition is Data type for the symbolic name of a pin type. */
 typedef uint8 Port_PortType;/* Type definition is Data type for the symbolic name of a port type. */
 typedef uint8 Port_PinModeType;
@@ -126,22 +126,28 @@ typedef enum
     PORT_A,PORT_B,PORT_C,PORT_D,PORT_E,PORT_F
 }port_num;
 typedef enum {
-	PORT_PIN_IN	 = 	STD_LOW,
-	PORT_PIN_OUT =	STD_HIGH
+	PORT_unchange	 = 	STD_LOW,
+	PORT_change =	STD_HIGH
 }Port_PinDirectionType;
 typedef enum
 {
-	PORT_PIN_MODE_ADC,
-	PORT_PIN_MODE_CAN,
-	PORT_PIN_MODE_DIO,
-	PORT_PIN_MODE_DIO_GPT,
-	PORT_PIN_MODE_DIO_WDG,
-	PORT_PIN_MODE_FLEXRAY,
-	PORT_PIN_MODE_ICU,
-	PORT_PIN_MODE_LIN,
-	PORT_PIN_MODE_MEM,
-	PORT_PIN_MODE_PWM,
-	PORT_PIN_MODE_SPI
+  PORT_PIN_MODE_aft0,
+  PORT_PIN_MODE_aft1,
+  PORT_PIN_MODE_aft2,
+  PORT_PIN_MODE_aft3,
+  PORT_PIN_MODE_aft4,
+  PORT_PIN_MODE_aft5,
+  PORT_PIN_MODE_aft6,
+  PORT_PIN_MODE_aft7,
+  PORT_PIN_MODE_aft8,
+  PORT_PIN_MODE_aft9,
+  PORT_PIN_MODE_aft10,
+  PORT_PIN_MODE_aft11,
+  PORT_PIN_MODE_aft12,
+  PORT_PIN_MODE_aft13,
+  PORT_PIN_MODE_aft14,
+  PORT_PIN_MODE_ADC,
+  PORT_PIN_MODE_DIO
 }mode_changes;
 /* Description: Structure to configure each individual PIN:
  *	1. the PORT Which the pin belongs to. 0, 1, 2, 3, 4 or 5

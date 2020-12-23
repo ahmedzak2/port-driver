@@ -38,3 +38,8 @@
  ||  (PORT_PBCFG_SW_PATCH_VERSION != PORT_SW_PATCH_VERSION))
   #error "The SW version of PBcfg.c does not match the expected version"
 #endif
+/* PB structure used with port_Init API */
+const Port_ConfigType Port_Config = {
+                                             input,PULL_UP,zero,
+				             change,PORT_change
+				         };

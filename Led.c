@@ -28,18 +28,16 @@ static void LED_configurations(void)
 {
     g_LED_Config.port_num  = LED_PORT;         Set LED Port value 
     g_LED_Config.pin_num   = LED_PIN_NUM;     Set LED PIN Number value 
-    g_LED_Config.direction = OUTPUT;           Set LED as OUTPUT pin 
-   g_LED_Config.resistor  = OFF;              Disable internal resistor 
    g_LED_Config.initial_value  = LED_OFF;       Turn Off the LED 
 }
 */
 
 /*********************************************************************************************/
- void LED_init(void)
+/* void LED_init(void)
 {
     LED_configurations(); 
 }
-
+*/
 /*********************************************************************************************/
 void LED_setOn(void)
 {
