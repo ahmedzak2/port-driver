@@ -22,6 +22,7 @@
 #endif
 
  volatile Port_Status PORTSTATUS;
+  Port_ConfigType port[MAX_PIN_NUM];
 /*******************************************************************************
  *                      Function Prototypes                                    *
  *******************************************************************************/
@@ -38,10 +39,22 @@
 ************************************************************************************/
 void Port_Init(const Port_ConfigType *ConfigPtr )
 {
+  
+  
+  
  Port_PinType loopCounter ;
  port_num port_num; 
   uint8 pin_num; 
    PORTSTATUS = PORT_INITIALIZED ;
+    for(loopCounter= MIN_PIN_NUM;loopCounter<=MAX_PIN_NUM;loopCounter ++)
+    {
+    port[loopCounter].direction = ConfigPtr->direction;
+      port[loopCounter].resistor= ConfigPtr->resistor;
+     port[loopCounter].initial_value= ConfigPtr->initial_value;
+     port[loopCounter].mode = ConfigPtr->mode;
+     port[loopCounter].change = ConfigPtr->change;
+
+    }
 
     volatile uint32 * PortGpio_Ptr = NULL_PTR; /* point to the required Port Registers base address */
     volatile uint32 delay = 0;
@@ -56,7 +69,6 @@ void Port_Init(const Port_ConfigType *ConfigPtr )
         {
         }
     #endif 
-    
     for(loopCounter= MIN_PIN_NUM;loopCounter<=MAX_PIN_NUM;loopCounter ++)
     {
       pin_num = loopCounter;
@@ -66,7 +78,7 @@ void Port_Init(const Port_ConfigType *ConfigPtr )
 }
 if ((pin_num  % compare == MIN_PIN_NUM) &&(pin_num!=MIN_PIN_NUM))
 {
- port_num = port_num +one;
+ port_num = ++port_num  ;
     }
       
     
@@ -109,11 +121,11 @@ if ((pin_num  % compare == MIN_PIN_NUM) &&(pin_num!=MIN_PIN_NUM))
     CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , pin_num);             /* Disable Alternative function for this pin by clear the corresponding bit in GPIOAFSEL register */
     *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_CTL_REG_OFFSET) &= ~(0x0000000F << (pin_num * 4));     /* Clear the PMCx bits for this pin */
     
-    if(ConfigPtr->direction == OUTPUT)
+    if(port[loopCounter].direction == OUTPUT)
     {
 	SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIR_REG_OFFSET) , pin_num);                /* Set the corresponding bit in the GPIODIR register to configure it as output pin */
         
-        if(ConfigPtr->initial_value == STD_HIGH)
+        if(port[loopCounter].initial_value == STD_HIGH)
         {
             SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DATA_REG_OFFSET) , pin_num);          /* Set the corresponding bit in the GPIODATA register to provide initial value 1 */
         }
@@ -122,15 +134,15 @@ if ((pin_num  % compare == MIN_PIN_NUM) &&(pin_num!=MIN_PIN_NUM))
             CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DATA_REG_OFFSET) , pin_num);        /* Clear the corresponding bit in the GPIODATA register to provide initial value 0 */
         }
     }
-    else if(ConfigPtr->direction == INPUT)
+    else if(port[loopCounter].direction == INPUT)
     {
         CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIR_REG_OFFSET) , pin_num);             /* Clear the corresponding bit in the GPIODIR register to configure it as input pin */
         
-        if(ConfigPtr->resistor == PULL_UP)
+        if(port[loopCounter].resistor == PULL_UP)
         {
             SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_PULL_UP_REG_OFFSET) , pin_num);       /* Set the corresponding bit in the GPIOPUR register to enable the internal pull up pin */
         }
-        else if(ConfigPtr->resistor == PULL_DOWN)
+        else if(port[loopCounter].resistor == PULL_DOWN)
         {
             SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_PULL_DOWN_REG_OFFSET) , pin_num);     /* Set the corresponding bit in the GPIOPDR register to enable the internal pull down pin */
         }
@@ -218,13 +230,13 @@ else
         case  PORT_F: PortGpio_Ptr = (volatile uint32 *)GPIO_PORTF_BASE_ADDRESS; /* PORTF Base Address */
 		 break;
     }
-    if(direction == PORT_change)
+    if(direction == Output)
     {
        /* Set the corresponding bit in the GPIODIR register to configure it as output pin */
     
 	SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIR_REG_OFFSET) , local_pin);               
 }
-else if(direction == INPUT)
+else if(direction == Input)
     {
       /* Clear the corresponding bit in the GPIODIR register to configure it as input pin */
    
@@ -248,11 +260,15 @@ else if(direction == INPUT)
 
 void Port_RefreshPortDirection(void)
 {
+    volatile uint32 * PortGpio_Ptr = NULL_PTR; /* point to the required Port Registers base address */ 
+ Port_PinType loopCounter ;
+ port_num port_num; 
+  uint8 pin_num; 
     
 #if (PORT_DEV_ERROR_DETECT == STD_ON)
   
   /* check if the Port driver initialized or Not */
-  if(PORTSTATUS != PORT_INITIALIZED)
+  if(PORTSTATUS!= PORT_INITIALIZED)
   {
     /* Report to DET  */
     Det_ReportError(PORT_MODULE_ID, PORT_INSTANCE_ID, Port_SET_PIN_DIRECTION_SID,
@@ -263,6 +279,61 @@ void Port_RefreshPortDirection(void)
   }
  
 #endif 
+  for(loopCounter= MIN_PIN_NUM;loopCounter<=MAX_PIN_NUM; loopCounter ++)
+    {
+      pin_num = loopCounter ;
+      if(pin_num >= compare)
+{
+    pin_num = pin_num % compare ; // compare reference to 8 bits
+}
+if ((pin_num  % compare == MIN_PIN_NUM) &&(pin_num!=MIN_PIN_NUM))
+{
+ port_num = ++port_num  ;
+    }
+      
+    
+    switch(port_num)
+    {
+        case  PORT_A: PortGpio_Ptr = (volatile uint32 *)GPIO_PORTA_BASE_ADDRESS; /* PORTA Base Address */
+		 break;
+	case  PORT_B: PortGpio_Ptr = (volatile uint32 *)GPIO_PORTB_BASE_ADDRESS; /* PORTB Base Address */
+		 break;
+	case  PORT_C: PortGpio_Ptr = (volatile uint32 *)GPIO_PORTC_BASE_ADDRESS; /* PORTC Base Address */
+		 break;
+	case  PORT_D: PortGpio_Ptr = (volatile uint32 *)GPIO_PORTD_BASE_ADDRESS; /* PORTD Base Address */
+		 break;
+        case  PORT_E: PortGpio_Ptr = (volatile uint32 *)GPIO_PORTE_BASE_ADDRESS; /* PORTE Base Address */
+		 break;
+        case  PORT_F: PortGpio_Ptr = (volatile uint32 *)GPIO_PORTF_BASE_ADDRESS; /* PORTF Base Address */
+		 break;
+    }
+
+    if(port[loopCounter].direction == OUTPUT)
+    {
+	SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIR_REG_OFFSET) , pin_num);                /* Set the corresponding bit in the GPIODIR register to configure it as output pin */
+        
+        if(port[loopCounter].initial_value == STD_HIGH)
+        {
+            SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DATA_REG_OFFSET) , pin_num);          /* Set the corresponding bit in the GPIODATA register to provide initial value 1 */
+        }
+        else
+        {
+            CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DATA_REG_OFFSET) , pin_num);        /* Clear the corresponding bit in the GPIODATA register to provide initial value 0 */
+        }
+    }
+    else if(port[loopCounter].direction == INPUT)
+    {
+        CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIR_REG_OFFSET) , pin_num);             /* Clear the corresponding bit in the GPIODIR register to configure it as input pin */
+        
+        if(port[loopCounter].resistor == PULL_UP)
+        {
+            SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_PULL_UP_REG_OFFSET) , pin_num);       /* Set the corresponding bit in the GPIOPUR register to enable the internal pull up pin */
+        }
+        else 
+        {
+            SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_PULL_DOWN_REG_OFFSET) , pin_num);     /* Set the corresponding bit in the GPIOPDR register to enable the internal pull down pin */
+        }
+  
 }
 /************************************************************************************
 * Service Name: Port_GetVersionInfo
@@ -284,11 +355,9 @@ void Port_GetVersionInfo(Std_VersionInfoType* versioninfo)
 	Det_ReportError(PORT_MODULE_ID, PORT_INSTANCE_ID, Port_VERSION_INFO_SID, port_E_PARAM_POINTER);
 	}
 	else
-        {
-        }
     #endif 
   
- 
+        {
                   /* Copy the vendor Id */
 		versioninfo->vendorID = (uint16)PORT_VENDOR_ID;
 		/* Copy the module Id */
@@ -300,7 +369,12 @@ void Port_GetVersionInfo(Std_VersionInfoType* versioninfo)
 		/* Copy Software Patch Version */
 		versioninfo->sw_patch_version = (uint8)PORT_SW_PATCH_VERSION;
 }
+}
 #endif
+
+
+    
+
 /************************************************************************************
 * Service Name: Port_SetPinMode
 * Sync/Async: Synchronous
@@ -317,7 +391,7 @@ volatile uint32 * PortGpio_Ptr = NULL_PTR; /* point to the required Port Registe
 Port_PortType  local_port=zero ;
 Port_PinType local_pin;
    
-    #if(PORT_DEV_ERROR_DETECT ==STD_ON)
+ #if(PORT_DEV_ERROR_DETECT ==STD_ON)
 if(Pin>PORT_CONFIGURED_PINS)
   {
     Det_ReportError(PORT_MODULE_ID, PORT_INSTANCE_ID, Port_SET_PIN_MODE,
@@ -331,7 +405,7 @@ if (PORT_PIN_MODE_CHANGEABLE == STD_OFF )
 if(Mode>Max_mode)
 {
   Det_ReportError(PORT_MODULE_ID, PORT_INSTANCE_ID, Port_SET_PIN_MODE,
-		port_E_MODE_UNCHANGEABLE);
+		port_E_PARAM_INVALID_MODE);
 }
 else
 {
@@ -344,7 +418,7 @@ else
 if ((Pin  % compare == MIN_PIN_NUM) &&(Pin!=zero))
 
 {
-  local_port= local_port+one;
+  local_port= local_port+one ;
     }
 switch(local_port)
     {
@@ -378,7 +452,6 @@ else
     SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_ALT_FUNC_REG_OFFSET) , local_pin); /* enbale Alternative function for this pin by clear the corresponding bit in GPIOAFSEL register */
       *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_CTL_REG_OFFSET) |= (0x0000000F << (local_pin * 4)); /* Clear the PMCx bits for this pin */
       *(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_CTL_REG_OFFSET) |= (Mode << (local_pin * 4));
+     SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIGITAL_ENABLE_REG_OFFSET) , local_pin);  /* Set the corresponding bit in the GPIODEN register to enable digital functionality on this pin */
 }
-
-
 }

@@ -126,8 +126,8 @@ typedef enum
     PORT_A,PORT_B,PORT_C,PORT_D,PORT_E,PORT_F
 }port_num;
 typedef enum {
-	PORT_unchange	 = 	STD_LOW,
-	PORT_change =	STD_HIGH
+	Input	 = 	STD_LOW,
+	Output =	STD_HIGH
 }Port_PinDirectionType;
 typedef enum
 {
@@ -165,7 +165,6 @@ typedef struct
    Pin_DirectionChange change;
 }Port_ConfigType;
 
-
 /*******************************************************************************
  *                      Function Prototypes                                    *
  *******************************************************************************/
@@ -186,7 +185,6 @@ void Port_SetPinMode(Port_PinType Pin, Port_PinModeType Mode);
 /* Extern PB structures to be used by Dio and other modules */
 
 extern const Port_ConfigType Port_Config;
-
 #endif /* PORT_H */
 
 

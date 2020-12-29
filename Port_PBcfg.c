@@ -40,6 +40,6 @@
 #endif
 /* PB structure used with port_Init API */
 const Port_ConfigType Port_Config = {
-                                             input,PULL_UP,zero,
-				             change,PORT_change
+                                             INPUT,PULL_UP,zero,
+				             change,yes
 				         };
