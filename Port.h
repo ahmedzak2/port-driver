@@ -155,14 +155,23 @@ typedef enum
  *      3. the direction of pin --> INPUT or OUTPUT
  *      4. the internal resistor --> Disable, Pull up or Pull down
  */
+typedef enum {
+LOW,HIGH
+}port_initial_value;
 typedef struct 
 {
-    
+    uint8 port_num; 
+    uint8 pin_num; 
     Port_PinDirection direction;
     Port_InternalResistor resistor;
-    uint8 initial_value;
+    port_initial_value value;
     Pin_ModeChange mode;
    Pin_DirectionChange change;
+}Port_ConfigChannel;
+
+typedef struct
+{
+	 Port_ConfigChannel port_channels[PORT_CONFIGURED_CHANNLES];
 }Port_ConfigType;
 
 /*******************************************************************************
@@ -184,7 +193,7 @@ void Port_SetPinMode(Port_PinType Pin, Port_PinModeType Mode);
 
 /* Extern PB structures to be used by Dio and other modules */
 
-extern const Port_ConfigType Port_Config;
+extern const Port_ConfigType Port_Configuration ;
 #endif /* PORT_H */
 
 
