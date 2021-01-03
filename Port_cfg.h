@@ -35,7 +35,7 @@
 
              
    // ports defination
-#define PORT_CONFIGURED_CHANNLES	   (43U)
+#define PORT_CONFIGURED_CHANNLES    (43U)
 #define MIN_PIN_NUM                 (0)
 #define MAX_PIN_NUM                 (42)
 #define zero                         (0)
@@ -61,7 +61,6 @@
  * *******************************************************************************/
 
 #define PORT_PINA0 	(Port_PinType)0
-
 #define PORT_PINA1 	(Port_PinType)1
 #define PORT_PINA2 	(Port_PinType)2
 #define PORT_PINA3 	(Port_PinType)3
@@ -455,7 +454,4 @@
 #define portConf_CHANNEL_OUTPUT_PIN_MODE42	   LOW         /*intial value*/ 
 #define portConf_CHANNEL_MODE_CHANGAEBLE42         change      /*mode chage*/
 #define portConf_CHANNEL_DIRECTION_CHANGAEBLE42     yes        /* direction change*/ 
-
-
-
 #endif /* port_CFG_H */

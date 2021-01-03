@@ -22,7 +22,7 @@
 #endif
 
  volatile Port_Status PORTSTATUS;
-static Port_ConfigChannel *port_PortChannels = NULL_PTR;
+const Port_ConfigChannel *port_PortChannels = NULL_PTR;
   
 /*******************************************************************************
  *                      Function Prototypes                                    *
