@@ -241,9 +241,6 @@ void Port_RefreshPortDirection(void)
 {
  volatile uint32 * PortGpio_Ptr = NULL_PTR; /* point to the required Port Registers base address */ 
  Port_PinType loopCounter ;
- port_num port_num; 
-  uint8 pin_num; 
- volatile uint32 DDR_Value;
 #if (PORT_DEV_ERROR_DETECT == STD_ON)
   
   /* check if the Port driver initialized or Not */
@@ -260,18 +257,9 @@ void Port_RefreshPortDirection(void)
 #endif 
   for(loopCounter= MIN_PIN_NUM;loopCounter<=MAX_PIN_NUM; loopCounter ++)
     {
-      pin_num = loopCounter ;
-      if(pin_num >= compare)
-{
-    pin_num = pin_num % compare ; // compare reference to 8 bits
-}
-if ((pin_num  % compare == MIN_PIN_NUM) &&(pin_num!=MIN_PIN_NUM))
-{
- port_num = ++port_num;
-    }
       
     
-    switch(port_num)
+    switch(port_PortChannels[loopCounter].port_num)
     {
         case  PORT_A: PortGpio_Ptr = (volatile uint32 *)GPIO_PORTA_BASE_ADDRESS; /* PORTA Base Address */
 		 break;
@@ -286,16 +274,23 @@ if ((pin_num  % compare == MIN_PIN_NUM) &&(pin_num!=MIN_PIN_NUM))
         case  PORT_F: PortGpio_Ptr = (volatile uint32 *)GPIO_PORTF_BASE_ADDRESS; /* PORTF Base Address */
 		 break;
     }
+    if(port_PortChannels[loopCounter].change == no)
+    {
     if(port_PortChannels[loopCounter].direction == OUTPUT)
     {
-	SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIR_REG_OFFSET) , pin_num);   
+	SET_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIR_REG_OFFSET) , port_PortChannels[loopCounter].pin_num);   
         
     }
     else if(port_PortChannels[loopCounter].direction == INPUT)
     {
-        CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIR_REG_OFFSET) , pin_num);       
+        CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)PortGpio_Ptr + PORT_DIR_REG_OFFSET) , port_PortChannels[loopCounter].pin_num);       
     }
 }
+    
+  else
+  {
+  }
+  }
 }
 /************************************************************************************
 * Service Name: Port_GetVersionInfo
